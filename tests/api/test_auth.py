@@ -1,28 +1,42 @@
+import allure
 from tests.config import BASE_URL
 
 
-def test_login_success(api_client, test_user):
-    response = api_client.post(f"{BASE_URL}/auth/login", json=test_user)
+@allure.epic("Auth")
+@allure.feature("Login")
+class TestLogin:
 
-    assert response.status_code == 201, f"Ожидали 201, получили {response.status_code}. Тело: {response.text}"
+    @allure.title("Успешный логин")
+    @allure.severity(allure.severity_level.BLOCKER)
+    @allure.story("Positive")
+    def test_login_success(self, api_client, test_user):
+        with allure.step("Отправить POST /auth/login с валидными данными"):
+            response = api_client.post(f"{BASE_URL}/auth/login", json=test_user)
 
-    data = response.json()
-    assert "token" in data, f"Нет токена в ответе: {data}"
-    assert isinstance(data["token"], str) and data["token"], "Токен пустой"
-    assert data["token"].count(".") == 2, "Токен не JWT"
+        with allure.step("Проверить статус-код 201"):
+            assert response.status_code == 201, f"Ожидали 201, получили {response.status_code}. Тело: {response.text}"
 
+        with allure.step("Проверить наличие и структуру JWT-токена"):
+            data = response.json()
+            assert "token" in data, f"Нет токена в ответе: {data}"
+            assert isinstance(data["token"], str) and data["token"], "Токен пустой"
+            assert data["token"].count(".") == 2, "Токен не JWT"
 
-def test_login_wrong_password(api_client, test_user):
-    bad_creds = {"username": test_user["username"], "password": "WrongPassword123"}
+    @allure.title("Неверный пароль - 401")
+    @allure.severity(allure.severity_level.CRITICAL)
+    @allure.story("Negative")
+    def test_login_wrong_password(self, api_client, test_user):
+        with allure.step("Отправить POST /auth/login с неверным паролем"):
+            bad_creds = {"username": test_user["username"], "password": "WrongPassword1234"}
+            response = api_client.post(f"{BASE_URL}/auth/login", json=bad_creds)
 
-    response = api_client.post(f"{BASE_URL}/auth/login", json=bad_creds)
-
-    assert response.status_code == 401, f"Ожидали 401, получили {response.status_code}. Тело: {response.text}"
-    assert response.text == "username or password is incorrect"
+        with allure.step("Проверить статус-код 401 и сообщение об ошибке"):
+            assert response.status_code == 401, f"Ожидали 401, получили {response.status_code}"
+            assert response.text == "username or password is incorrect"
 
 
 def test_login_wrong_username(api_client):
-    bad_creds = {"username": "Some_user_1", "password": "Some_Password"}
+    bad_creds = {"username": "Some_user_123", "password": "Some_Password"}
 
     response = api_client.post(f"{BASE_URL}/auth/login", json=bad_creds)
 
