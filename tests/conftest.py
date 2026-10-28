@@ -25,7 +25,7 @@ def test_user(api_client):
 @pytest.fixture
 def auth_client(api_client, test_user):
     response = api_client.post(f"{BASE_URL}/auth/login", json=test_user)
-    assert response.status_code == 200, f"Login failed: {response.text}"
+    assert response.status_code == 201, f"Login failed: {response.text}"
 
     token = response.json().get("token")
     assert token, "В ответе логина нет токена"
