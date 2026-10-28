@@ -1,6 +1,9 @@
 import allure
+import logging
 from tests.config import BASE_URL
 from tests.helpers import assert_status, assert_json_content_type
+
+logger = logging.getLogger(__name__)
 
 
 @allure.epic("FakeStoreAPI")
@@ -22,6 +25,7 @@ class TestLogin:
 
         with allure.step("Проверить наличие и структуру JWT-токена"):
             data = response.json()
+            logger.info(f"Токен: {data["token"]}")
             assert "token" in data, f"Нет токена в ответе: {data}"
             assert isinstance(data["token"], str) and data["token"], "Токен пустой"
             assert data["token"].count(".") == 2, "Токен не JWT"
@@ -84,3 +88,18 @@ class TestLogin:
         with allure.step("Проверить статус-код 400 и сообщение об ошибке"):
             assert_status(response, 400)
             assert response.text == "username and password are not provided in JSON format"
+
+    @allure.story("Успешная авторизация")
+    @allure.title("Доступ к ресурсу с валидным токеном")
+    @allure.severity(allure.severity_level.CRITICAL)
+    def test_access_with_valid_token(self, auth_client):
+        with allure.step("Отправить GET /carts/user/2 с токеном в заголовках"):
+            response = auth_client.get(f"{BASE_URL}/carts/user/2")
+
+        with allure.step("Проверить статус-код 200"):
+            assert_status(response, 200)
+
+        with allure.step("Проверить, что токен был принят и вернулись данные"):
+            carts = response.json()
+            logger.info(f"Данные корзин пользователя: {carts}")
+            assert isinstance(carts, list), f"Ожидали список корзин, получили {type(carts)}"
