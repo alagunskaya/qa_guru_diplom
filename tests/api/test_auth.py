@@ -1,5 +1,6 @@
 import allure
 from tests.config import BASE_URL
+from tests.helpers import assert_status, assert_json_content_type
 
 
 @allure.epic("FakeStoreAPI")
@@ -14,7 +15,10 @@ class TestLogin:
             response = api_client.post(f"{BASE_URL}/auth/login", json=test_user)
 
         with allure.step("Проверить статус-код 201"):
-            assert response.status_code == 201, f"Ожидали 201, получили {response.status_code}. Тело: {response.text}"
+            assert_status(response, 201)
+
+        with allure.step("Проверить заголовок Content-Type"):
+            assert_json_content_type(response)
 
         with allure.step("Проверить наличие и структуру JWT-токена"):
             data = response.json()
@@ -31,7 +35,7 @@ class TestLogin:
             response = api_client.post(f"{BASE_URL}/auth/login", json=bad_creds)
 
         with allure.step("Проверить статус-код 401 и сообщение об ошибке"):
-            assert response.status_code == 401, f"Ожидали 401, получили {response.status_code}"
+            assert_status(response, 401)
             assert response.text == "username or password is incorrect"
 
     @allure.story("Ошибки авторизации")
@@ -43,7 +47,7 @@ class TestLogin:
             response = api_client.post(f"{BASE_URL}/auth/login", json=bad_creds)
 
         with allure.step("Проверить статус-код 401 и сообщение об ошибке"):
-            assert response.status_code == 401, f"Ожидали 401, получили {response.status_code}. Тело: {response.text}"
+            assert_status(response, 401)
             assert response.text == "username or password is incorrect"
 
     @allure.story("Валидация полей")
@@ -55,7 +59,7 @@ class TestLogin:
             response = api_client.post(f"{BASE_URL}/auth/login", json=bad_creds)
 
         with allure.step("Проверить статус-код 400 и сообщение об ошибке"):
-            assert response.status_code == 400, f"Ожидали 400, получили {response.status_code}. Тело: {response.text}"
+            assert_status(response, 400)
             assert response.text == "username and password are not provided in JSON format"
 
     @allure.story("Валидация полей")
@@ -67,7 +71,7 @@ class TestLogin:
             response = api_client.post(f"{BASE_URL}/auth/login", json=bad_creds)
 
         with allure.step("Проверить статус-код 400 и сообщение об ошибке"):
-            assert response.status_code == 400, f"Ожидали 400, получили {response.status_code}. Тело: {response.text}"
+            assert_status(response, 400)
             assert response.text == "username and password are not provided in JSON format"
 
     @allure.story("Валидация полей")
@@ -78,5 +82,5 @@ class TestLogin:
             response = api_client.post(f"{BASE_URL}/auth/login", json={})
 
         with allure.step("Проверить статус-код 400 и сообщение об ошибке"):
-            assert response.status_code == 400, f"Ожидали 400, получили {response.status_code}. Тело: {response.text}"
+            assert_status(response, 400)
             assert response.text == "username and password are not provided in JSON format"
