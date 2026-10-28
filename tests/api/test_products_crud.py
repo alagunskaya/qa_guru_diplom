@@ -72,3 +72,19 @@ class TestProductsCrud:
             deleted = response.json()
             assert deleted["id"] == 1
             assert "title" in deleted
+
+    @allure.story("Создание (POST)")
+    @allure.title("Создание товара с невалидным JSON")
+    @allure.severity(allure.severity_level.NORMAL)
+    def test_create_product_invalid_json(self, api_client):
+        payload = "invalid_json_string"
+
+        with allure.step("Отправить POST /products с невалидным типом данных"):
+            response = api_client.post(
+                f"{BASE_URL}/products",
+                data=payload,
+                headers={"Content-Type": "application/json"}
+            )
+
+        with allure.step("Проверить статус-код 400"):
+            assert response.status_code == 400, f"Ожидали 400, получили {response.status_code}. Тело: {response.text}"

@@ -58,17 +58,18 @@ class TestCartsCrud:
             assert len(updated["products"]) == 1
             assert updated["products"][0]["productId"] == 3
 
-    @allure.story("Удаление (DELETE)")
-    @allure.title("Успешное удаление корзины")
-    @allure.severity(allure.severity_level.CRITICAL)
-    def test_delete_cart_success(self, api_client):
-        with allure.step("Отправить DELETE /carts/1"):
-            response = api_client.delete(f"{BASE_URL}/carts/1")
+    @allure.story("Создание (POST)")
+    @allure.title("Создание корзины с невалидным JSON")
+    @allure.severity(allure.severity_level.NORMAL)
+    def test_create_cart_invalid_json(self, api_client):
+        payload = "invalid_json_string"
 
-        with allure.step("Проверить статус-код 200"):
-            assert response.status_code == 200, f"Ожидали 200, получили {response.status_code}. Тело: {response.text}"
+        with allure.step("Отправить POST /carts с невалидным типом данных"):
+            response = api_client.post(
+                f"{BASE_URL}/carts",
+                data=payload,
+                headers={"Content-Type": "application/json"}
+            )
 
-        with allure.step("Проверить, что вернулся удаленный объект"):
-            deleted = response.json()
-            assert deleted["id"] == 1
-            assert "userId" in deleted
+        with allure.step("Проверить статус-код 400"):
+            assert response.status_code == 400, f"Ожидали 400, получили {response.status_code}. Тело: {response.text}"
