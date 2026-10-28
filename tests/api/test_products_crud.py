@@ -2,6 +2,7 @@ import allure
 from jsonschema import validate
 from tests.config import BASE_URL
 from schemas.product_schema import PRODUCT_CREATE_SCHEMA
+from tests.helpers import assert_status
 
 
 @allure.epic("FakeStoreAPI")
@@ -14,7 +15,7 @@ class TestProductsCrud:
     def test_create_product_success(self, api_client):
         payload = {
             "title": "Test Product",
-            "price": 42.5,
+            "price": 45.5,
             "description": "API tests",
             "image": "https://i.pravatar.cc",
             "category": "electronics"
@@ -24,7 +25,7 @@ class TestProductsCrud:
             response = api_client.post(f"{BASE_URL}/products", json=payload)
 
         with allure.step("Проверить статус-код 201"):
-            assert response.status_code == 201, f"Ожидали 201, получили {response.status_code}. Тело: {response.text}"
+            assert_status(response, 201)
 
         with allure.step("Проверить, что вернулись переданные данные и сгенерированный id"):
             created = response.json()
@@ -51,7 +52,7 @@ class TestProductsCrud:
             response = api_client.put(f"{BASE_URL}/products/1", json=payload)
 
         with allure.step("Проверить статус-код 200"):
-            assert response.status_code == 200, f"Ожидали 200, получили {response.status_code}. Тело: {response.text}"
+            assert_status(response, 200)
 
         with allure.step("Проверить, что данные обновились"):
             updated = response.json()
@@ -66,7 +67,7 @@ class TestProductsCrud:
             response = api_client.delete(f"{BASE_URL}/products/1")
 
         with allure.step("Проверить статус-код 200"):
-            assert response.status_code == 200, f"Ожидали 200, получили {response.status_code}. Тело: {response.text}"
+            assert_status(response, 200)
 
         with allure.step("Проверить, что вернулся удаленный объект"):
             deleted = response.json()
@@ -87,4 +88,4 @@ class TestProductsCrud:
             )
 
         with allure.step("Проверить статус-код 400"):
-            assert response.status_code == 400, f"Ожидали 400, получили {response.status_code}. Тело: {response.text}"
+            assert_status(response, 400)

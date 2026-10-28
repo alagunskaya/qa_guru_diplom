@@ -2,6 +2,7 @@ import allure
 from jsonschema import validate
 from tests.config import BASE_URL
 from schemas.product_schema import PRODUCTS_LIST_SCHEMA, PRODUCT_SCHEMA
+from tests.helpers import assert_status
 
 
 @allure.epic("FakeStoreAPI")
@@ -16,7 +17,7 @@ class TestProducts:
             response = api_client.get(f"{BASE_URL}/products")
 
         with allure.step("Проверить статус-код 200"):
-            assert response.status_code == 200, f"Ожидали 200, получили {response.status_code}. Тело: {response.text}"
+            assert_status(response, 200)
 
         with allure.step("Проверить, что вернулось ровно 20 товаров"):
             products = response.json()
@@ -30,7 +31,7 @@ class TestProducts:
             response = api_client.get(f"{BASE_URL}/products")
 
         with allure.step("Проверить статус-код 200"):
-            assert response.status_code == 200, f"Ожидали 200, получили {response.status_code}"
+            assert_status(response, 200)
 
         with allure.step("Провалидировать список по JSON-схеме"):
             products = response.json()
@@ -44,7 +45,7 @@ class TestProducts:
             response = api_client.get(f"{BASE_URL}/products/1")
 
         with allure.step("Проверить статус-код 200"):
-            assert response.status_code == 200
+            assert_status(response, 200)
 
         with allure.step("Провалидировать товар по JSON-схеме"):
             product = response.json()
@@ -70,7 +71,7 @@ class TestProducts:
             response = api_client.get(f"{BASE_URL}/products/1")
 
         with allure.step("Проверить статус-код 200"):
-            assert response.status_code == 200, f"Ожидали 200, получили {response.status_code}. Тело: {response.text}"
+            assert_status(response, 200)
 
         with allure.step("Проверить поля конкретного товара"):
             product = response.json()
@@ -87,7 +88,7 @@ class TestProducts:
             response = api_client.get(f"{BASE_URL}/products/999")
 
         with allure.step("Проверить статус-код 200"):
-            assert response.status_code == 200, f"Ожидали 200, получили {response.status_code}"
+            assert_status(response, 200)
 
         with allure.step("Проверить, что тело ответа пустое"):
             assert response.text == "", f"Ожидали пустое тело, получили: {response.text}"
@@ -100,7 +101,7 @@ class TestProducts:
             response = api_client.get(f"{BASE_URL}/products/categories")
 
         with allure.step("Проверить статус-код 200"):
-            assert response.status_code == 200, f"Ожидали 200, получили {response.status_code}. Тело: {response.text}"
+            assert_status(response, 200)
 
         with allure.step("Проверить структуру и наличие 4 категорий"):
             categories = response.json()
@@ -119,7 +120,7 @@ class TestProducts:
             response = api_client.get(f"{BASE_URL}/products/category/{category}")
 
         with allure.step("Проверить статус-код 200"):
-            assert response.status_code == 200, f"Ожидали 200, получили {response.status_code}. Тело: {response.text}"
+            assert_status(response, 200)
             products = response.json()
 
         with allure.step("Проверить, что список не пуст и все товары нужной категории"):
@@ -135,7 +136,7 @@ class TestProducts:
             response = api_client.get(f"{BASE_URL}/products", params={"limit": 5})
 
         with allure.step("Проверить статус-код 200"):
-            assert response.status_code == 200, f"Ожидали 200, получили {response.status_code}. Тело: {response.text}"
+            assert_status(response, 200)
 
         with allure.step("Проверить, что вернулось ровно 5 товаров"):
             products = response.json()
@@ -149,7 +150,7 @@ class TestProducts:
             response = api_client.get(f"{BASE_URL}/products", params={"sort": "desc"})
 
         with allure.step("Проверить статус-код 200"):
-            assert response.status_code == 200, f"Ожидали 200, получили {response.status_code}. Тело: {response.text}"
+            assert_status(response, 200)
 
         with allure.step("Проверить, что ID отсортированы по убыванию"):
             products = response.json()

@@ -1,5 +1,6 @@
 import allure
 from tests.config import BASE_URL
+from tests.helpers import assert_status
 
 
 @allure.epic("FakeStoreAPI")
@@ -14,7 +15,7 @@ class TestUsers:
             response = api_client.get(f"{BASE_URL}/users")
 
         with allure.step("Проверить статус-код 200"):
-            assert response.status_code == 200, f"Ожидали 200, получили {response.status_code}. Тело: {response.text}"
+            assert_status(response, 200)
 
         with allure.step("Проверить, что вернулся непустой список"):
             users = response.json()

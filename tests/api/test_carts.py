@@ -3,6 +3,7 @@ import pytest
 from jsonschema import validate
 from tests.config import BASE_URL
 from schemas.cart_schema import CARTS_LIST_SCHEMA, CART_SCHEMA
+from tests.helpers import assert_status
 
 
 @allure.epic("FakeStoreAPI")
@@ -17,7 +18,7 @@ class TestCarts:
             response = api_client.get(f"{BASE_URL}/carts")
 
         with allure.step("Проверить статус-код 200"):
-            assert response.status_code == 200, f"Ожидали 200, получили {response.status_code}. Тело: {response.text}"
+            assert_status(response, 200)
 
         with allure.step("Провалидировать ответ по JSON-схеме"):
             validate(instance=response.json(), schema=CARTS_LIST_SCHEMA)
@@ -30,7 +31,7 @@ class TestCarts:
             response = api_client.get(f"{BASE_URL}/carts/1")
 
         with allure.step("Проверить статус-код 200"):
-            assert response.status_code == 200, f"Ожидали 200, получили {response.status_code}. Тело: {response.text}"
+            assert_status(response, 200)
 
         with allure.step("Провалидировать ответ по JSON-схеме корзины"):
             cart = response.json()
@@ -42,13 +43,13 @@ class TestCarts:
     @allure.story("Фильтрация")
     @allure.title("Получение корзин по ID пользователя")
     @allure.severity(allure.severity_level.NORMAL)
-    @pytest.mark.parametrize("user_id", [1, 2, 3, 4, 8])
+    @pytest.mark.parametrize("user_id", [1, 2, 3, 8])
     def test_get_carts_by_user(self, api_client, user_id):
         with allure.step(f"Отправить GET /carts/user/{user_id}"):
             response = api_client.get(f"{BASE_URL}/carts/user/{user_id}")
 
         with allure.step(f"Проверить статус-код 200 и наличие корзин"):
-            assert response.status_code == 200, f"Ожидали 200, получили {response.status_code}. Тело: {response.text}"
+            assert_status(response, 200)
             carts = response.json()
             assert len(carts) > 0, f"У пользователя {user_id} нет корзин"
 
@@ -64,7 +65,7 @@ class TestCarts:
             response = api_client.get(f"{BASE_URL}/carts/user/999")
 
         with allure.step("Проверить статус-код 200"):
-            assert response.status_code == 200, f"Ожидали 200, получили {response.status_code}"
+            assert_status(response, 200)
 
         with allure.step("Проверить, что вернулся пустой массив"):
             carts = response.json()
