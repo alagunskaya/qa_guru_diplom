@@ -16,13 +16,19 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                sh 'pip install -r requirements.txt'
+                sh '''
+                    python3 -m venv .venv
+                    .venv/bin/python -m pip install --upgrade pip
+                    .venv/bin/python -m pip install -r requirements.txt
+                '''
             }
         }
 
         stage('Run Tests') {
             steps {
-                sh 'python -m pytest tests/ --alluredir=allure-results'
+                sh '''
+                    .venv/bin/python -m pytest tests/ --alluredir=allure-results
+                '''
             }
         }
     }
