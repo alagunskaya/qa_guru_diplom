@@ -1,5 +1,6 @@
 pipeline {
-    agent any
+    // Запускаем только на агентах с меткой python
+    agent { label 'python' }
 
     stages {
         stage('Clean Workspace') {
@@ -14,20 +15,13 @@ pipeline {
             }
         }
 
-        stage('Install Dependencies') {
+        stage('Install and Run Tests') {
             steps {
                 sh '''
                     python -m venv .venv
                     source .venv/bin/activate
                     pip install -r requirements.txt
-                '''
-            }
-        }
-
-        stage('Run Tests') {
-            steps {
-                sh '''
-                    .venv/bin/python -m pytest tests/ --alluredir=allure-results
+                    pytest tests/ --alluredir=allure-results
                 '''
             }
         }
