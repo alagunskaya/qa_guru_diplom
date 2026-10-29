@@ -2,6 +2,7 @@ import allure
 from jsonschema import validate
 from tests.config import BASE_URL
 from schemas.cart_schema import CART_CREATE_SCHEMA
+from schemas.request_schema import CREATE_CART_REQUEST_SCHEMA
 from tests.helpers import assert_status
 
 
@@ -20,6 +21,9 @@ class TestCartsCrud:
                 {"productId": 2, "quantity": 1}
             ]
         }
+
+        with allure.step("Провалидировать тело запроса по JSON-схеме"):
+            validate(instance=payload, schema=CREATE_CART_REQUEST_SCHEMA)
 
         with allure.step("Отправить POST /carts с валидными данными"):
             response = api_client.post(f"{BASE_URL}/carts", json=payload)
@@ -46,6 +50,9 @@ class TestCartsCrud:
                 {"productId": 3, "quantity": 5}
             ]
         }
+
+        with allure.step("Провалидировать тело запроса по JSON-схеме"):
+            validate(instance=payload, schema=CREATE_CART_REQUEST_SCHEMA)
 
         with allure.step("Отправить PUT /carts/1 с новыми данными"):
             response = api_client.put(f"{BASE_URL}/carts/1", json=payload)

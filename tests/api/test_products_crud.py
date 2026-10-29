@@ -2,6 +2,7 @@ import allure
 from jsonschema import validate
 from tests.config import BASE_URL
 from schemas.product_schema import PRODUCT_CREATE_SCHEMA
+from schemas.request_schema import CREATE_PRODUCT_REQUEST_SCHEMA
 from tests.helpers import assert_status
 
 
@@ -20,6 +21,9 @@ class TestProductsCrud:
             "image": "https://i.pravatar.cc",
             "category": "electronics"
         }
+
+        with allure.step("Провалидировать тело запроса по JSON-схеме"):
+            validate(instance=payload, schema=CREATE_PRODUCT_REQUEST_SCHEMA)
 
         with allure.step("Отправить POST /products с валидными данными"):
             response = api_client.post(f"{BASE_URL}/products", json=payload)
@@ -47,6 +51,9 @@ class TestProductsCrud:
             "image": "https://i.pravatar.cc",
             "category": "electronics"
         }
+
+        with allure.step("Провалидировать тело запроса по JSON-схеме"):
+            validate(instance=payload, schema=CREATE_PRODUCT_REQUEST_SCHEMA)
 
         with allure.step("Отправить PUT /products/1 с новыми данными"):
             response = api_client.put(f"{BASE_URL}/products/1", json=payload)
