@@ -1,16 +1,16 @@
 pipeline {
     agent any
 
-    options {
-        cleanWs()
-    }
-
     stages {
+        stage('Clean Workspace') {
+            steps {
+                deleteDir()
+            }
+        }
+
         stage('Checkout') {
             steps {
-                script {
-                    checkout scm
-                }
+                checkout scm
             }
         }
 
