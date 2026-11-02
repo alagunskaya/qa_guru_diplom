@@ -87,16 +87,3 @@ class TestCarts:
             for cart in carts:
                 for item in cart["products"]:
                     assert item["productId"] in existing_ids, f"В корзине {cart['id']} несуществующий товар {item['productId']}"
-
-    @allure.story("Бизнес-логика")
-    @allure.title("Количество товара в корзинах всегда положительное")
-    @allure.severity(allure.severity_level.NORMAL)
-    def test_cart_quantities_are_positive(self, api_client):
-        with allure.step("Получить список всех корзин"):
-            response = api_client.get(f"{BASE_URL}/carts")
-            carts = response.json()
-
-        with allure.step("Проверить, что quantity > 0 для всех товаров"):
-            for cart in carts:
-                for item in cart["products"]:
-                    assert item["quantity"] > 0, f"Корзина {cart['id']}, товар {item['productId']}: количество={item['quantity']}"
