@@ -1,5 +1,5 @@
 import allure
-from tests.config import BASE_URL
+from tests.conftest import build_url
 from tests.helpers import assert_status
 
 
@@ -12,7 +12,7 @@ class TestUsers:
     @allure.severity(allure.severity_level.CRITICAL)
     def test_get_users_returns_list(self, api_client):
         with allure.step("Отправить GET /users"):
-            response = api_client.get(f"{BASE_URL}/users")
+            response = api_client.get(build_url("/users"))
 
         with allure.step("Проверить статус-код 200"):
             assert_status(response, 200)

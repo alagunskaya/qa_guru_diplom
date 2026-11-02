@@ -1,8 +1,22 @@
-import allure
+import os
 import logging
+import allure
 import pytest
 import requests
-from tests.config import BASE_URL
+from dotenv import load_dotenv
+from urllib.parse import urljoin
+
+load_dotenv()
+
+BASE_URL = os.getenv("BASE_URL", "https://fakestoreapi.com")
+
+logger = logging.getLogger(__name__)
+
+
+def build_url(endpoint: str) -> str:
+    if endpoint.startswith("http"):
+        return endpoint
+    return urljoin(BASE_URL, endpoint)
 
 
 @pytest.fixture
@@ -14,7 +28,7 @@ def api_client():
 
 @pytest.fixture
 def test_user(api_client):
-    response = api_client.get(f"{BASE_URL}/users")
+    response = api_client.get(build_url("/users"))
     assert response.status_code == 200, f"Не удалось получить пользователей: {response.text}"
 
     users = response.json()
@@ -26,7 +40,7 @@ def test_user(api_client):
 
 @pytest.fixture
 def auth_client(api_client, test_user):
-    response = api_client.post(f"{BASE_URL}/auth/login", json=test_user)
+    response = api_client.post(build_url("/auth/login"), json=test_user)
     assert response.status_code == 201, f"Login failed: {response.text}"
 
     token = response.json().get("token")
@@ -34,9 +48,6 @@ def auth_client(api_client, test_user):
 
     api_client.headers.update({"Authorization": f"Bearer {token}"})
     return api_client
-
-
-logger = logging.getLogger(__name__)
 
 
 @pytest.fixture(autouse=True)

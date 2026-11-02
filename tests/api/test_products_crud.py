@@ -1,6 +1,6 @@
 import allure
 from jsonschema import validate
-from tests.config import BASE_URL
+from tests.conftest import build_url
 from schemas.product_schema import PRODUCT_CREATE_SCHEMA
 from schemas.request_schema import CREATE_PRODUCT_REQUEST_SCHEMA
 from tests.helpers import assert_status
@@ -26,7 +26,7 @@ class TestProductsCrud:
             validate(instance=payload, schema=CREATE_PRODUCT_REQUEST_SCHEMA)
 
         with allure.step("Отправить POST /products с валидными данными"):
-            response = api_client.post(f"{BASE_URL}/products", json=payload)
+            response = api_client.post(build_url("/products"), json=payload)
 
         with allure.step("Проверить статус-код 201"):
             assert_status(response, 201)
@@ -56,7 +56,7 @@ class TestProductsCrud:
             validate(instance=payload, schema=CREATE_PRODUCT_REQUEST_SCHEMA)
 
         with allure.step("Отправить PUT /products/1 с новыми данными"):
-            response = api_client.put(f"{BASE_URL}/products/1", json=payload)
+            response = api_client.put(build_url("/products/1"), json=payload)
 
         with allure.step("Проверить статус-код 200"):
             assert_status(response, 200)
@@ -71,7 +71,7 @@ class TestProductsCrud:
     @allure.severity(allure.severity_level.CRITICAL)
     def test_delete_product_success(self, api_client):
         with allure.step("Отправить DELETE /products/1"):
-            response = api_client.delete(f"{BASE_URL}/products/1")
+            response = api_client.delete(build_url("/products/1"))
 
         with allure.step("Проверить статус-код 200"):
             assert_status(response, 200)
@@ -89,7 +89,7 @@ class TestProductsCrud:
 
         with allure.step("Отправить POST /products с невалидным типом данных"):
             response = api_client.post(
-                f"{BASE_URL}/products",
+                build_url("/products"),
                 data=payload,
                 headers={"Content-Type": "application/json"}
             )

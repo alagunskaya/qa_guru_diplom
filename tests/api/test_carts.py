@@ -1,9 +1,12 @@
 import allure
 import pytest
+import logging
 from jsonschema import validate
-from tests.config import BASE_URL
+from tests.conftest import build_url
 from schemas.cart_schema import CARTS_LIST_SCHEMA, CART_SCHEMA
 from tests.helpers import assert_status
+
+logger = logging.getLogger(__name__)
 
 
 @allure.epic("FakeStoreAPI")
@@ -15,7 +18,7 @@ class TestCarts:
     @allure.severity(allure.severity_level.CRITICAL)
     def test_get_all_carts_matches_schema(self, api_client):
         with allure.step("Отправить GET /carts"):
-            response = api_client.get(f"{BASE_URL}/carts")
+            response = api_client.get(build_url("/carts"))
 
         with allure.step("Проверить статус-код 200"):
             assert_status(response, 200)
@@ -28,7 +31,7 @@ class TestCarts:
     @allure.severity(allure.severity_level.CRITICAL)
     def test_get_single_cart_matches_schema(self, api_client):
         with allure.step("Отправить GET /carts/1"):
-            response = api_client.get(f"{BASE_URL}/carts/1")
+            response = api_client.get(build_url("/carts/1"))
 
         with allure.step("Проверить статус-код 200"):
             assert_status(response, 200)
@@ -46,7 +49,7 @@ class TestCarts:
     @pytest.mark.parametrize("user_id", [1, 2, 3, 8])
     def test_get_carts_by_user(self, api_client, user_id):
         with allure.step(f"Отправить GET /carts/user/{user_id}"):
-            response = api_client.get(f"{BASE_URL}/carts/user/{user_id}")
+            response = api_client.get(build_url(f"/carts/user/{user_id}"))
 
         with allure.step(f"Проверить статус-код 200 и наличие корзин"):
             assert_status(response, 200)
@@ -62,7 +65,7 @@ class TestCarts:
     @allure.severity(allure.severity_level.MINOR)
     def test_get_carts_for_nonexistent_user(self, api_client):
         with allure.step("Отправить GET /carts/user/999"):
-            response = api_client.get(f"{BASE_URL}/carts/user/999")
+            response = api_client.get(build_url("/carts/user/999"))
 
         with allure.step("Проверить статус-код 200"):
             assert_status(response, 200)
@@ -76,14 +79,30 @@ class TestCarts:
     @allure.severity(allure.severity_level.CRITICAL)
     def test_cart_products_reference_existing_products(self, api_client):
         with allure.step("Получить список ID всех существующих товаров"):
-            products_response = api_client.get(f"{BASE_URL}/products")
+            products_response = api_client.get(build_url("/products"))
             existing_ids = {p["id"] for p in products_response.json()}
 
         with allure.step("Получить список всех корзин"):
-            carts_response = api_client.get(f"{BASE_URL}/carts")
+            carts_response = api_client.get(build_url("/carts"))
             carts = carts_response.json()
 
         with allure.step("Проверить, что каждый productId в корзинах существует"):
             for cart in carts:
                 for item in cart["products"]:
-                    assert item["productId"] in existing_ids, f"В корзине {cart['id']} несуществующий товар {item['productId']}"
+                    assert item[
+                               "productId"] in existing_ids, f"В корзине {cart['id']} несуществующий товар {item['productId']}"
+
+    @allure.story("Параметры запроса")
+    @allure.title("Ограничение количества возвращаемых корзин (limit)")
+    @allure.severity(allure.severity_level.NORMAL)
+    def test_get_carts_with_limit(self, api_client):
+        with allure.step("Отправить GET /carts с параметром limit=3"):
+            response = api_client.get(build_url(f"/carts"), params={"limit": 3})
+
+        with allure.step("Проверить статус-код 200"):
+            assert_status(response, 200)
+
+        with allure.step("Проверить, что вернулось ровно 3 корзины"):
+            carts = response.json()
+            logger.info(f"Вернулось корзин: {len(carts)}. ID: {[c['id'] for c in carts]}")
+            assert len(carts) == 3, f"Ожидали 3 корзины, получили {len(carts)}"

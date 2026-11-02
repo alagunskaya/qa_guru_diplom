@@ -1,6 +1,6 @@
 import allure
 from jsonschema import validate
-from tests.config import BASE_URL
+from tests.conftest import build_url
 from schemas.product_schema import PRODUCTS_LIST_SCHEMA, PRODUCT_SCHEMA
 from tests.helpers import assert_status
 
@@ -14,7 +14,7 @@ class TestProducts:
     @allure.severity(allure.severity_level.CRITICAL)
     def test_get_all_products(self, api_client):
         with allure.step("Отправить GET /products"):
-            response = api_client.get(f"{BASE_URL}/products")
+            response = api_client.get(build_url("/products"))
 
         with allure.step("Проверить статус-код 200"):
             assert_status(response, 200)
@@ -28,7 +28,7 @@ class TestProducts:
     @allure.severity(allure.severity_level.NORMAL)
     def test_get_all_products_matches_schema(self, api_client):
         with allure.step("Отправить GET /products"):
-            response = api_client.get(f"{BASE_URL}/products")
+            response = api_client.get(build_url("/products"))
 
         with allure.step("Проверить статус-код 200"):
             assert_status(response, 200)
@@ -42,7 +42,7 @@ class TestProducts:
     @allure.severity(allure.severity_level.NORMAL)
     def test_get_single_product_matches_schema(self, api_client):
         with allure.step("Отправить GET /products/1"):
-            response = api_client.get(f"{BASE_URL}/products/1")
+            response = api_client.get(build_url("/products/1"))
 
         with allure.step("Проверить статус-код 200"):
             assert_status(response, 200)
@@ -56,7 +56,7 @@ class TestProducts:
     @allure.severity(allure.severity_level.NORMAL)
     def test_get_all_products_unique_ids(self, api_client):
         with allure.step("Отправить GET /products"):
-            response = api_client.get(f"{BASE_URL}/products")
+            response = api_client.get(build_url("/products"))
             products = response.json()
 
         with allure.step("Проверить, что нет дублирующихся ID"):
@@ -68,7 +68,7 @@ class TestProducts:
     @allure.severity(allure.severity_level.CRITICAL)
     def test_get_single_product_success(self, api_client):
         with allure.step("Отправить GET /products/1"):
-            response = api_client.get(f"{BASE_URL}/products/1")
+            response = api_client.get(build_url("/products/1"))
 
         with allure.step("Проверить статус-код 200"):
             assert_status(response, 200)
@@ -85,7 +85,7 @@ class TestProducts:
     @allure.severity(allure.severity_level.MINOR)
     def test_get_single_product_not_found(self, api_client):
         with allure.step("Отправить GET /products/999"):
-            response = api_client.get(f"{BASE_URL}/products/999")
+            response = api_client.get(build_url("/products/999"))
 
         with allure.step("Проверить статус-код 200"):
             assert_status(response, 200)
@@ -98,7 +98,7 @@ class TestProducts:
     @allure.severity(allure.severity_level.NORMAL)
     def test_get_categories(self, api_client):
         with allure.step("Отправить GET /products/categories"):
-            response = api_client.get(f"{BASE_URL}/products/categories")
+            response = api_client.get(build_url("/products/categories"))
 
         with allure.step("Проверить статус-код 200"):
             assert_status(response, 200)
@@ -117,7 +117,7 @@ class TestProducts:
         category = "electronics"
 
         with allure.step(f"Отправить GET /products/category/{category}"):
-            response = api_client.get(f"{BASE_URL}/products/category/{category}")
+            response = api_client.get(build_url(f"/products/category/{category}"))
 
         with allure.step("Проверить статус-код 200"):
             assert_status(response, 200)
@@ -133,7 +133,7 @@ class TestProducts:
     @allure.severity(allure.severity_level.NORMAL)
     def test_get_products_with_limit(self, api_client):
         with allure.step("Отправить GET /products с параметром limit=5"):
-            response = api_client.get(f"{BASE_URL}/products", params={"limit": 5})
+            response = api_client.get(build_url(f"/products"), params={"limit": 5})
 
         with allure.step("Проверить статус-код 200"):
             assert_status(response, 200)
@@ -147,7 +147,7 @@ class TestProducts:
     @allure.severity(allure.severity_level.NORMAL)
     def test_get_products_sorted_desc(self, api_client):
         with allure.step("Отправить GET /products с параметром sort=desc"):
-            response = api_client.get(f"{BASE_URL}/products", params={"sort": "desc"})
+            response = api_client.get(build_url(f"/products"), params={"sort": "desc"})
 
         with allure.step("Проверить статус-код 200"):
             assert_status(response, 200)
@@ -162,7 +162,7 @@ class TestProducts:
     @allure.severity(allure.severity_level.NORMAL)
     def test_product_rating_structure(self, api_client):
         with allure.step("Отправить GET /products/1"):
-            response = api_client.get(f"{BASE_URL}/products/1")
+            response = api_client.get(build_url("/products/1"))
             rating = response.json()["rating"]
 
         with allure.step("Проверить структуру вложенного объекта rating"):

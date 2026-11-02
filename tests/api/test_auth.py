@@ -1,6 +1,6 @@
 import allure
 import logging
-from tests.config import BASE_URL
+from tests.conftest import build_url
 from tests.helpers import assert_status, assert_json_content_type
 
 logger = logging.getLogger(__name__)
@@ -15,7 +15,7 @@ class TestLogin:
     @allure.severity(allure.severity_level.BLOCKER)
     def test_login_success(self, api_client, test_user):
         with allure.step("Отправить POST /auth/login с валидными данными"):
-            response = api_client.post(f"{BASE_URL}/auth/login", json=test_user)
+            response = api_client.post(build_url("/auth/login"), json=test_user)
 
         with allure.step("Проверить статус-код 201"):
             assert_status(response, 201)
@@ -36,7 +36,7 @@ class TestLogin:
     def test_login_wrong_password(self, api_client, test_user):
         with allure.step("Отправить POST /auth/login с неверным паролем"):
             bad_creds = {"username": test_user["username"], "password": "WrongPassword1234"}
-            response = api_client.post(f"{BASE_URL}/auth/login", json=bad_creds)
+            response = api_client.post(build_url("/auth/login"), json=bad_creds)
 
         with allure.step("Проверить статус-код 401 и сообщение об ошибке"):
             assert_status(response, 401)
@@ -48,7 +48,7 @@ class TestLogin:
     def test_login_wrong_username(self, api_client):
         with allure.step("Отправить POST /auth/login с несуществующим username"):
             bad_creds = {"username": "Some_user_123", "password": "Some_Password"}
-            response = api_client.post(f"{BASE_URL}/auth/login", json=bad_creds)
+            response = api_client.post(build_url("/auth/login"), json=bad_creds)
 
         with allure.step("Проверить статус-код 401 и сообщение об ошибке"):
             assert_status(response, 401)
@@ -60,7 +60,7 @@ class TestLogin:
     def test_login_missing_password(self, api_client, test_user):
         with allure.step("Отправить POST /auth/login без поля password"):
             bad_creds = {"username": test_user["username"]}
-            response = api_client.post(f"{BASE_URL}/auth/login", json=bad_creds)
+            response = api_client.post(build_url("/auth/login"), json=bad_creds)
 
         with allure.step("Проверить статус-код 400 и сообщение об ошибке"):
             assert_status(response, 400)
@@ -72,7 +72,7 @@ class TestLogin:
     def test_login_missing_username(self, api_client, test_user):
         with allure.step("Отправить POST /auth/login без поля username"):
             bad_creds = {"password": test_user["password"]}
-            response = api_client.post(f"{BASE_URL}/auth/login", json=bad_creds)
+            response = api_client.post(build_url("/auth/login"), json=bad_creds)
 
         with allure.step("Проверить статус-код 400 и сообщение об ошибке"):
             assert_status(response, 400)
@@ -83,7 +83,7 @@ class TestLogin:
     @allure.severity(allure.severity_level.MINOR)
     def test_login_empty_body(self, api_client):
         with allure.step("Отправить POST /auth/login с пустым JSON"):
-            response = api_client.post(f"{BASE_URL}/auth/login", json={})
+            response = api_client.post(build_url("/auth/login"), json={})
 
         with allure.step("Проверить статус-код 400 и сообщение об ошибке"):
             assert_status(response, 400)
@@ -94,7 +94,7 @@ class TestLogin:
     @allure.severity(allure.severity_level.CRITICAL)
     def test_access_with_valid_token(self, auth_client):
         with allure.step("Отправить GET /carts/user/2 с токеном в заголовках"):
-            response = auth_client.get(f"{BASE_URL}/carts/user/2")
+            response = auth_client.get(build_url("/carts/user/2"))
 
         with allure.step("Проверить статус-код 200"):
             assert_status(response, 200)

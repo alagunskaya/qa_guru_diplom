@@ -1,6 +1,6 @@
 import allure
 from jsonschema import validate
-from tests.config import BASE_URL
+from tests.conftest import build_url
 from schemas.cart_schema import CART_CREATE_SCHEMA
 from schemas.request_schema import CREATE_CART_REQUEST_SCHEMA
 from tests.helpers import assert_status
@@ -26,7 +26,7 @@ class TestCartsCrud:
             validate(instance=payload, schema=CREATE_CART_REQUEST_SCHEMA)
 
         with allure.step("Отправить POST /carts с валидными данными"):
-            response = api_client.post(f"{BASE_URL}/carts", json=payload)
+            response = api_client.post(build_url("/carts"), json=payload)
 
         with allure.step("Проверить статус-код 201"):
             assert_status(response, 201)
@@ -55,7 +55,7 @@ class TestCartsCrud:
             validate(instance=payload, schema=CREATE_CART_REQUEST_SCHEMA)
 
         with allure.step("Отправить PUT /carts/1 с новыми данными"):
-            response = api_client.put(f"{BASE_URL}/carts/1", json=payload)
+            response = api_client.put(build_url("/carts/1"), json=payload)
 
         with allure.step("Проверить статус-код 200"):
             assert_status(response, 200)
@@ -74,7 +74,7 @@ class TestCartsCrud:
 
         with allure.step("Отправить POST /carts с невалидным типом данных"):
             response = api_client.post(
-                f"{BASE_URL}/carts",
+                build_url("/carts"),  # <--- Скобка закрывается здесь!
                 data=payload,
                 headers={"Content-Type": "application/json"}
             )
