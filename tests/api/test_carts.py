@@ -2,7 +2,7 @@ import allure
 import pytest
 import logging
 from jsonschema import validate
-from tests.conftest import build_url
+from tests.api.conftest import build_url
 from schemas.cart_schema import CARTS_LIST_SCHEMA, CART_SCHEMA
 from tests.helpers import assert_status
 

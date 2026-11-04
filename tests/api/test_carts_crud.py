@@ -1,6 +1,6 @@
 import allure
 from jsonschema import validate
-from tests.conftest import build_url
+from tests.api.conftest import build_url
 from schemas.cart_schema import CART_CREATE_SCHEMA
 from schemas.request_schema import CREATE_CART_REQUEST_SCHEMA
 from tests.helpers import assert_status

@@ -1,5 +1,5 @@
 import allure
-from tests.conftest import build_url
+from tests.api.conftest import build_url
 from tests.helpers import assert_status
 
 

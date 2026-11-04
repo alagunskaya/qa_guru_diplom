@@ -1,6 +1,6 @@
 import allure
 import logging
-from tests.conftest import build_url
+from tests.api.conftest import build_url
 from tests.helpers import assert_status, assert_json_content_type
 
 logger = logging.getLogger(__name__)
