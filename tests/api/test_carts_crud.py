@@ -7,7 +7,7 @@ from tests.helpers import assert_status
 
 
 @allure.epic("FakeStoreAPI")
-@allure.feature("Корзины")
+@allure.feature("Корзины (CRUD)")
 class TestCartsCrud:
 
     @allure.story("Создание (POST)")
@@ -31,25 +31,20 @@ class TestCartsCrud:
         with allure.step("Проверить статус-код 201"):
             assert_status(response, 201)
 
-        with allure.step("Проверить, что вернулись переданные данные и сгенерированный id"):
+        with allure.step("Провалидировать ответ по JSON-схеме создания"):
             created = response.json()
+            validate(instance=created, schema=CART_CREATE_SCHEMA)
+
+        with allure.step("Проверить, что вернулись переданные данные и сгенерированный id"):
             assert "id" in created, f"В ответе нет id: {created}"
             assert created["userId"] == payload["userId"]
             assert len(created["products"]) == len(payload["products"])
-
-        with allure.step("Провалидировать ответ по JSON-схеме создания"):
-            validate(instance=created, schema=CART_CREATE_SCHEMA)
 
     @allure.story("Обновление (PUT)")
     @allure.title("Успешное обновление корзины")
     @allure.severity(allure.severity_level.CRITICAL)
     def test_update_cart_success(self, api_client):
-        payload = {
-            "userId": 1,
-            "products": [
-                {"productId": 3, "quantity": 5}
-            ]
-        }
+        payload = {"userId": 1, "products": [{"productId": 3, "quantity": 5}]}
 
         with allure.step("Провалидировать тело запроса по JSON-схеме"):
             validate(instance=payload, schema=CREATE_CART_REQUEST_SCHEMA)
@@ -73,11 +68,7 @@ class TestCartsCrud:
         payload = "invalid_json_string"
 
         with allure.step("Отправить POST /carts с невалидным типом данных"):
-            response = api_client.post(
-                build_url("/carts"),  # <--- Скобка закрывается здесь!
-                data=payload,
-                headers={"Content-Type": "application/json"}
-            )
+            response = api_client.post(build_url("/carts"), data=payload, headers={"Content-Type": "application/json"})
 
         with allure.step("Проверить статус-код 400"):
             assert_status(response, 400)

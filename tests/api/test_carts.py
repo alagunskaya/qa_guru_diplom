@@ -13,8 +13,8 @@ logger = logging.getLogger(__name__)
 @allure.feature("Корзины")
 class TestCarts:
 
-    @allure.story("Чтение (GET)")
-    @allure.title("Список всех корзин соответствует схеме")
+    @allure.story("Валидация схемы")
+    @allure.title("Список всех корзин соответствует схеме и код 200")
     @allure.severity(allure.severity_level.CRITICAL)
     def test_get_all_carts_matches_schema(self, api_client):
         with allure.step("Отправить GET /carts"):
@@ -26,8 +26,8 @@ class TestCarts:
         with allure.step("Провалидировать ответ по JSON-схеме"):
             validate(instance=response.json(), schema=CARTS_LIST_SCHEMA)
 
-    @allure.story("Чтение (GET)")
-    @allure.title("Получение одной корзины по ID")
+    @allure.story("Валидация схемы")
+    @allure.title("Одна корзина соответствует схеме и код 200")
     @allure.severity(allure.severity_level.CRITICAL)
     def test_get_single_cart_matches_schema(self, api_client):
         with allure.step("Отправить GET /carts/1"):
@@ -37,10 +37,17 @@ class TestCarts:
             assert_status(response, 200)
 
         with allure.step("Провалидировать ответ по JSON-схеме корзины"):
-            cart = response.json()
-            validate(instance=cart, schema=CART_SCHEMA)
+            validate(instance=response.json(), schema=CART_SCHEMA)
+
+    @allure.story("Чтение (GET)")
+    @allure.title("Получение одной корзины по ID (проверка ID)")
+    @allure.severity(allure.severity_level.NORMAL)
+    def test_get_single_cart_content(self, api_client):
+        with allure.step("Отправить GET /carts/1"):
+            response = api_client.get(build_url("/carts/1"))
 
         with allure.step("Проверить, что ID корзины равен 1"):
+            cart = response.json()
             assert cart["id"] == 1
 
     @allure.story("Фильтрация")
@@ -51,24 +58,21 @@ class TestCarts:
         with allure.step(f"Отправить GET /carts/user/{user_id}"):
             response = api_client.get(build_url(f"/carts/user/{user_id}"))
 
-        with allure.step(f"Проверить статус-код 200 и наличие корзин"):
+        with allure.step(f"Проверить статус-код 200"):
             assert_status(response, 200)
+
+        with allure.step(f"Проверить, что корзины принадлежат пользователю {user_id}"):
             carts = response.json()
             assert len(carts) > 0, f"У пользователя {user_id} нет корзин"
-
-        with allure.step(f"Проверить, что все корзины принадлежат пользователю {user_id}"):
             for cart in carts:
                 assert cart["userId"] == user_id, f"Корзина {cart['id']} принадлежит {cart['userId']}, а не {user_id}"
 
     @allure.story("Фильтрация")
-    @allure.title("Запрос корзин для несуществующего пользователя")
+    @allure.title("Запрос корзин для несуществующего пользователя возвращает пустой массив")
     @allure.severity(allure.severity_level.MINOR)
     def test_get_carts_for_nonexistent_user(self, api_client):
         with allure.step("Отправить GET /carts/user/999"):
             response = api_client.get(build_url("/carts/user/999"))
-
-        with allure.step("Проверить статус-код 200"):
-            assert_status(response, 200)
 
         with allure.step("Проверить, что вернулся пустой массив"):
             carts = response.json()
@@ -97,10 +101,7 @@ class TestCarts:
     @allure.severity(allure.severity_level.NORMAL)
     def test_get_carts_with_limit(self, api_client):
         with allure.step("Отправить GET /carts с параметром limit=3"):
-            response = api_client.get(build_url(f"/carts"), params={"limit": 3})
-
-        with allure.step("Проверить статус-код 200"):
-            assert_status(response, 200)
+            response = api_client.get(build_url("/carts"), params={"limit": 3})
 
         with allure.step("Проверить, что вернулось ровно 3 корзины"):
             carts = response.json()

@@ -9,22 +9,8 @@ from tests.helpers import assert_status
 @allure.feature("Товары")
 class TestProducts:
 
-    @allure.story("Чтение (GET)")
-    @allure.title("Получение списка товаров")
-    @allure.severity(allure.severity_level.CRITICAL)
-    def test_get_all_products(self, api_client):
-        with allure.step("Отправить GET /products"):
-            response = api_client.get(build_url("/products"))
-
-        with allure.step("Проверить статус-код 200"):
-            assert_status(response, 200)
-
-        with allure.step("Проверить, что вернулось ровно 20 товаров"):
-            products = response.json()
-            assert len(products) == 20, f"Ожидали 20 товаров, получили {len(products)}"
-
     @allure.story("Валидация схемы")
-    @allure.title("Список товаров соответствует JSON-схеме")
+    @allure.title("Список товаров соответствует JSON-схеме и код 200")
     @allure.severity(allure.severity_level.NORMAL)
     def test_get_all_products_matches_schema(self, api_client):
         with allure.step("Отправить GET /products"):
@@ -38,7 +24,7 @@ class TestProducts:
             validate(instance=products, schema=PRODUCTS_LIST_SCHEMA)
 
     @allure.story("Валидация схемы")
-    @allure.title("Один товар соответствует JSON-схеме")
+    @allure.title("Один товар соответствует JSON-схеме и коду 200")
     @allure.severity(allure.severity_level.NORMAL)
     def test_get_single_product_matches_schema(self, api_client):
         with allure.step("Отправить GET /products/1"):
@@ -50,6 +36,31 @@ class TestProducts:
         with allure.step("Провалидировать товар по JSON-схеме"):
             product = response.json()
             validate(instance=product, schema=PRODUCT_SCHEMA)
+
+    @allure.story("Чтение (GET)")
+    @allure.title("Получение списка товаров")
+    @allure.severity(allure.severity_level.CRITICAL)
+    def test_get_all_products(self, api_client):
+        with allure.step("Отправить GET /products"):
+            response = api_client.get(build_url("/products"))
+
+        with allure.step("Проверить, что вернулось ровно 20 товаров"):
+            products = response.json()
+            assert len(products) == 20, f"Ожидали 20 товаров, получили {len(products)}"
+
+    @allure.story("Чтение (GET)")
+    @allure.title("Получение конкретного товара по ID")
+    @allure.severity(allure.severity_level.CRITICAL)
+    def test_get_single_product_content(self, api_client):
+        with allure.step("Отправить GET /products/1"):
+            response = api_client.get(build_url("/products/1"))
+
+        with allure.step("Проверить поля конкретного товара"):
+            product = response.json()
+            assert product["id"] == 1
+            assert product["title"] == "Fjallraven - Foldsack No. 1 Backpack, Fits 15 Laptops"
+            assert product["price"] == 109.95
+            assert product["category"] == "men's clothing"
 
     @allure.story("Бизнес-логика")
     @allure.title("ID всех товаров уникальны")
@@ -64,31 +75,11 @@ class TestProducts:
             assert len(ids) == len(set(ids)), f"Найдены дубли ID: {ids}"
 
     @allure.story("Чтение (GET)")
-    @allure.title("Получение конкретного товара по ID")
-    @allure.severity(allure.severity_level.CRITICAL)
-    def test_get_single_product_success(self, api_client):
-        with allure.step("Отправить GET /products/1"):
-            response = api_client.get(build_url("/products/1"))
-
-        with allure.step("Проверить статус-код 200"):
-            assert_status(response, 200)
-
-        with allure.step("Проверить поля конкретного товара"):
-            product = response.json()
-            assert product["id"] == 1
-            assert product["title"] == "Fjallraven - Foldsack No. 1 Backpack, Fits 15 Laptops"
-            assert product["price"] == 109.95
-            assert product["category"] == "men's clothing"
-
-    @allure.story("Чтение (GET)")
     @allure.title("Запрос несуществующего товара возвращает пустое тело")
     @allure.severity(allure.severity_level.MINOR)
     def test_get_single_product_not_found(self, api_client):
         with allure.step("Отправить GET /products/999"):
             response = api_client.get(build_url("/products/999"))
-
-        with allure.step("Проверить статус-код 200"):
-            assert_status(response, 200)
 
         with allure.step("Проверить, что тело ответа пустое"):
             assert response.text == "", f"Ожидали пустое тело, получили: {response.text}"
@@ -99,9 +90,6 @@ class TestProducts:
     def test_get_categories(self, api_client):
         with allure.step("Отправить GET /products/categories"):
             response = api_client.get(build_url("/products/categories"))
-
-        with allure.step("Проверить статус-код 200"):
-            assert_status(response, 200)
 
         with allure.step("Проверить структуру и наличие 4 категорий"):
             categories = response.json()
@@ -118,9 +106,6 @@ class TestProducts:
 
         with allure.step(f"Отправить GET /products/category/{category}"):
             response = api_client.get(build_url(f"/products/category/{category}"))
-
-        with allure.step("Проверить статус-код 200"):
-            assert_status(response, 200)
             products = response.json()
 
         with allure.step("Проверить, что список не пуст и все товары нужной категории"):
@@ -135,9 +120,6 @@ class TestProducts:
         with allure.step("Отправить GET /products с параметром limit=5"):
             response = api_client.get(build_url(f"/products"), params={"limit": 5})
 
-        with allure.step("Проверить статус-код 200"):
-            assert_status(response, 200)
-
         with allure.step("Проверить, что вернулось ровно 5 товаров"):
             products = response.json()
             assert len(products) == 5, f"Ожидали 5 товаров, получили {len(products)}"
@@ -148,9 +130,6 @@ class TestProducts:
     def test_get_products_sorted_desc(self, api_client):
         with allure.step("Отправить GET /products с параметром sort=desc"):
             response = api_client.get(build_url(f"/products"), params={"sort": "desc"})
-
-        with allure.step("Проверить статус-код 200"):
-            assert_status(response, 200)
 
         with allure.step("Проверить, что ID отсортированы по убыванию"):
             products = response.json()

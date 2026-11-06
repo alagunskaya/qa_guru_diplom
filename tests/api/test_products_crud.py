@@ -7,7 +7,7 @@ from tests.helpers import assert_status
 
 
 @allure.epic("FakeStoreAPI")
-@allure.feature("Товары")
+@allure.feature("Товары (CRUD)")
 class TestProductsCrud:
 
     @allure.story("Создание (POST)")
@@ -31,14 +31,14 @@ class TestProductsCrud:
         with allure.step("Проверить статус-код 201"):
             assert_status(response, 201)
 
-        with allure.step("Проверить, что вернулись переданные данные и сгенерированный id"):
+        with allure.step("Провалидировать ответ по JSON-схеме создания"):
             created = response.json()
+            validate(instance=created, schema=PRODUCT_CREATE_SCHEMA)
+
+        with allure.step("Проверить, что вернулись переданные данные и сгенерированный id"):
             assert "id" in created, f"В ответе нет id: {created}"
             assert created["title"] == payload["title"]
             assert created["price"] == payload["price"]
-
-        with allure.step("Провалидировать ответ по JSON-схеме создания"):
-            validate(instance=created, schema=PRODUCT_CREATE_SCHEMA)
 
     @allure.story("Обновление (PUT)")
     @allure.title("Успешное обновление существующего товара")
