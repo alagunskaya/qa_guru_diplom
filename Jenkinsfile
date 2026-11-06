@@ -1,6 +1,12 @@
 pipeline {
     agent { label 'python' }
 
+    parameters {
+        string(name: 'SELENOID_LOGIN', description: 'Login for Selenoid')
+        password(name: 'SELENOID_PASSWORD', description: 'Password for Selenoid')
+        string(name: 'SELENOID_URL', description: 'URL for Selenoid')
+    }
+
     stages {
         stage('Clean Workspace') {
             steps {
@@ -28,9 +34,9 @@ pipeline {
             steps {
                 writeFile file: '.env', text: """\
                     BASE_URL=https://fakestoreapi.com
-                    SELENOID_LOGIN=user1
-                    SELENOID_PASSWORD=1234
-                    SELENOID_URL=selenoid.qa.guru
+                    SELENOID_LOGIN=${params.SELENOID_LOGIN}
+                    SELENOID_PASSWORD=${params.SELENOID_PASSWORD}
+                    SELENOID_URL=${params.SELENOID_URL}
                 """.stripIndent()
             }
         }
