@@ -1,6 +1,11 @@
 pipeline {
     agent { label 'python' }
 
+    // Добавляем таймстампы в консоль Jenkins
+    options {
+        timestamps()
+    }
+
     parameters {
         string(name: 'SELENOID_LOGIN', description: 'Login for Selenoid')
         password(name: 'SELENOID_PASSWORD', description: 'Password for Selenoid')
@@ -8,19 +13,14 @@ pipeline {
     }
 
     stages {
-        stage('Clean Workspace') {
+        stage('Prepare Workspace') {
             steps {
                 deleteDir()
-            }
-        }
-
-        stage('Checkout') {
-            steps {
                 checkout scm
             }
         }
 
-        stage('Install Dependencies') {
+        stage('Setup Python Environment') {
             steps {
                 sh '''
                     python -m venv .venv
@@ -30,8 +30,9 @@ pipeline {
             }
         }
 
-        stage('Create .env file') {
+        stage('Generate Environment Variables') {
             steps {
+                // Создаем .env из безопасных параметров сборки
                 writeFile file: '.env', text: """\
                     BASE_URL=https://fakestoreapi.com
                     SELENOID_LOGIN=${params.SELENOID_LOGIN}
@@ -41,7 +42,7 @@ pipeline {
             }
         }
 
-        stage('Run API Tests') {
+        stage('Execute API Test Suite') {
             steps {
                 sh '''
                     source .venv/bin/activate
@@ -50,7 +51,7 @@ pipeline {
             }
         }
 
-        stage('Run UI Tests') {
+        stage('Execute UI Test Suite (Selenoid)') {
             steps {
                 sh '''
                     source .venv/bin/activate
@@ -62,6 +63,7 @@ pipeline {
 
     post {
         always {
+            // Генерация единого Allure-отчета
             allure includeProperties: false, jdk: '', results: [[path: 'allure-results']]
         }
     }
