@@ -94,14 +94,15 @@ UI: https://selenoid.qa.guru/ui/
 - Запуск API-тестов
 - Запуск UI-тестов в Selenoid
 - Генерация общего Allure-отчёта (содержит результаты и API, и UI тестов)
+- Отправка в Telegram оповещения о результатах тестирования после завершения сборки
 
 ### Отчёт Allure
-![Allure Report](media/Allure3.png)
+![Allure Report](media/Allure5.png)
 ![Allure Report](media/Allure2.png)
 ![Allure Report](media/Allure4.png)
 
-### Успешная сборка в Jenkins
-![Jenkins Build](media/Jenkins2.png)
+#### Результат сборки Jenkins и оповещение в Telegram: 
+<img src="/media/Jenkins3.png" alt="Сборка Jenkins" height ="340"><img src="/media/Results.png" alt="Оповещение" height="340">
 
 ### Пример видеозаписи прохождения теста
 ![Video](media/Add_to_cart.gif)
