@@ -72,28 +72,34 @@ pipeline {
 
             // Отправка уведомления в Telegram
             script {
-                sh """
-                    if [ ! -f "allure-report/widgets/summary.json" ]; then
-                        echo "No Allure report found. Skipping Telegram notification."
-                        exit 0
-                    fi
+                // Передаем токен и чат как переменные окружения
+                withEnv([
+                    "TG_TOKEN=${params.TELEGRAM_TOKEN}",
+                    "TG_CHAT=${params.TELEGRAM_CHAT_ID}"
+                ]) {
+                    sh '''
+                        if [ ! -f "allure-report/widgets/summary.json" ]; then
+                            echo "No Allure report found. Skipping Telegram notification."
+                            exit 0
+                        fi
 
-                    JAR_VERSION=5.1.2
-                    JAR="allure-notifications-\${JAR_VERSION}.jar"
+                        JAR_VERSION=5.1.2
+                        JAR="allure-notifications-${JAR_VERSION}.jar"
 
-                    if [ ! -f "\$JAR" ]; then
-                        curl -fsSL -o "\$JAR" "https://github.com/qa-guru/allure-notifications/releases/download/v\${JAR_VERSION}/\$JAR" || \\
-                        curl -fsSL -o "\$JAR" "https://github.com/qa-guru/allure-notifications/releases/download/\${JAR_VERSION}/\$JAR"
-                    fi
+                        if [ ! -f "$JAR" ]; then
+                            curl -fsSL -o "$JAR" "https://github.com/qa-guru/allure-notifications/releases/download/v${JAR_VERSION}/$JAR" || \
+                            curl -fsSL -o "$JAR" "https://github.com/qa-guru/allure-notifications/releases/download/${JAR_VERSION}/$JAR"
+                        fi
 
-                    # Передаем токен и чат через -D (системные свойства)
-                    java -DconfigFile=notifications/telegram.json \\
-                         "-Dnotifications.telegram.token=${params.TELEGRAM_TOKEN}" \\
-                         "-Dnotifications.telegram.chat=${params.TELEGRAM_CHAT_ID}" \\
-                         "-Dnotifications.base.reportLink=${env.BUILD_URL}allure/index.html" \\
-                         "-Dnotifications.base.project=${env.JOB_BASE_NAME}" \\
-                         -jar "\$JAR"
-                """
+                        # Токен и чат берутся из переменных окружения TG_TOKEN и TG_CHAT
+                        java -DconfigFile=notifications/telegram.json \
+                             "-Dnotifications.telegram.token=$TG_TOKEN" \
+                             "-Dnotifications.telegram.chat=$TG_CHAT" \
+                             "-Dnotifications.base.reportLink=${BUILD_URL}allure/index.html" \
+                             "-Dnotifications.base.project=${JOB_BASE_NAME}" \
+                             -jar "$JAR"
+                    '''
+                }
             }
         }
     }
