@@ -1,7 +1,6 @@
 pipeline {
     agent { label 'python' }
 
-    // Добавляем таймстампы в консоль Jenkins
     options {
         timestamps()
     }
@@ -11,7 +10,6 @@ pipeline {
         password(name: 'SELENOID_PASSWORD', description: 'Password for Selenoid')
         string(name: 'SELENOID_URL', description: 'URL for Selenoid')
 
-        // Параметры для Telegram
         password(name: 'TELEGRAM_TOKEN', description: 'Telegram Bot Token')
         string(name: 'TELEGRAM_CHAT_ID', description: 'Telegram Chat ID')
     }
@@ -36,7 +34,6 @@ pipeline {
 
         stage('Generate Environment Variables') {
             steps {
-                // Создаем .env из безопасных параметров сборки
                 writeFile file: '.env', text: """\
                     BASE_URL=https://fakestoreapi.com
                     SELENOID_LOGIN=${params.SELENOID_LOGIN}
@@ -67,12 +64,9 @@ pipeline {
 
     post {
         always {
-            // Генерация единого Allure-отчета
             allure includeProperties: false, jdk: '', results: [[path: 'allure-results']]
 
-            // Отправка уведомления в Telegram
             script {
-                // 1. Создаем файл конфигурации
                 writeFile file: 'notifications/telegram.json', text: '''\
                     {
                       "base": {
@@ -92,7 +86,6 @@ pipeline {
                     }
                 '''.stripIndent()
 
-                // 2. Передаем токен и чат через переменные окружения
                 withEnv([
                     "TG_TOKEN=${params.TELEGRAM_TOKEN}",
                     "TG_CHAT=${params.TELEGRAM_CHAT_ID}"
@@ -111,7 +104,7 @@ pipeline {
                             curl -fsSL -o "$JAR" "https://github.com/qa-guru/allure-notifications/releases/download/${JAR_VERSION}/$JAR"
                         fi
 
-                        # Передаем абсолютный путь к папке с отчетом
+                        # Передаем все обязательные параметры
                         java -DconfigFile=notifications/telegram.json \
                              "-Dnotifications.telegram.token=$TG_TOKEN" \
                              "-Dnotifications.telegram.chat=$TG_CHAT" \
