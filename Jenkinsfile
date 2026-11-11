@@ -119,6 +119,7 @@ pipeline {
                              "-Dnotifications.base.project=${JOB_BASE_NAME}" \
                              "-Dnotifications.base.allureFolder=${WORKSPACE}/allure-report" \
                              "-Dnotifications.base.language=en" \
+                             "-Dnotifications.base.enableChart=true" \
                              -jar "$JAR"
                     '''
                 }
