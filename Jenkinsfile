@@ -111,11 +111,13 @@ pipeline {
                             curl -fsSL -o "$JAR" "https://github.com/qa-guru/allure-notifications/releases/download/${JAR_VERSION}/$JAR"
                         fi
 
+                        # Передаем абсолютный путь к папке с отчетом
                         java -DconfigFile=notifications/telegram.json \
                              "-Dnotifications.telegram.token=$TG_TOKEN" \
                              "-Dnotifications.telegram.chat=$TG_CHAT" \
                              "-Dnotifications.base.reportLink=${BUILD_URL}allure/index.html" \
                              "-Dnotifications.base.project=${JOB_BASE_NAME}" \
+                             "-Dnotifications.base.allureFolder=${WORKSPACE}/allure-report" \
                              -jar "$JAR"
                     '''
                 }
