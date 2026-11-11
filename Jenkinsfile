@@ -118,6 +118,7 @@ pipeline {
                              "-Dnotifications.base.reportLink=${BUILD_URL}allure/index.html" \
                              "-Dnotifications.base.project=${JOB_BASE_NAME}" \
                              "-Dnotifications.base.allureFolder=${WORKSPACE}/allure-report" \
+                             "-Dnotifications.base.language=en" \
                              -jar "$JAR"
                     '''
                 }
