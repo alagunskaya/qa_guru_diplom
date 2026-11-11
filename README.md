@@ -97,12 +97,12 @@ UI: https://selenoid.qa.guru/ui/
 - Отправка в Telegram оповещения о результатах тестирования после завершения сборки
 
 ### Отчёт Allure
-![Allure Report](media/Allure5.png)
+![Allure Report](media/Jenkins3.png)
 ![Allure Report](media/Allure2.png)
 ![Allure Report](media/Allure4.png)
 
 ### Результат сборки Jenkins и оповещение в Telegram
-<img src="/media/Jenkins3.png" alt="Сборка Jenkins" height ="270"><img src="/media/Results.png" alt="Оповещение" height="270">
+<img src="/media/Allure5.png" alt="Сборка Jenkins" height ="250"><img src="/media/Results.png" alt="Оповещение" height="250">
 
 ### Пример видеозаписи прохождения теста
 ![Video](media/Add_to_cart.gif)
