@@ -10,6 +10,10 @@ pipeline {
         string(name: 'SELENOID_LOGIN', description: 'Login for Selenoid')
         password(name: 'SELENOID_PASSWORD', description: 'Password for Selenoid')
         string(name: 'SELENOID_URL', description: 'URL for Selenoid')
+
+        // Параметры для Telegram
+        password(name: 'TELEGRAM_TOKEN', description: 'Telegram Bot Token')
+        string(name: 'TELEGRAM_CHAT_ID', description: 'Telegram Chat ID')
     }
 
     stages {
@@ -65,6 +69,32 @@ pipeline {
         always {
             // Генерация единого Allure-отчета
             allure includeProperties: false, jdk: '', results: [[path: 'allure-results']]
+
+            // Отправка уведомления в Telegram
+            script {
+                sh '''
+                    if [ ! -f "allure-report/widgets/summary.json" ]; then
+                        echo "No Allure report found. Skipping Telegram notification."
+                        exit 0
+                    fi
+
+                    JAR_VERSION=5.1.2
+                    JAR="allure-notifications-${JAR_VERSION}.jar"
+
+                    if [ ! -f "$JAR" ]; then
+                        curl -fsSL -o "$JAR" "https://github.com/qa-guru/allure-notifications/releases/download/v${JAR_VERSION}/${JAR}" || \
+                        curl -fsSL -o "$JAR" "https://github.com/qa-guru/allure-notifications/releases/download/${JAR_VERSION}/${JAR}"
+                    fi
+
+                    # Передаем токен и чат через -D (системные свойства)
+                    java -DconfigFile=notifications/telegram.json \
+                         "-Dnotifications.telegram.token=${params.TELEGRAM_TOKEN}" \
+                         "-Dnotifications.telegram.chat=${params.TELEGRAM_CHAT_ID}" \
+                         "-Dnotifications.base.reportLink=${env.BUILD_URL}allure/index.html" \
+                         "-Dnotifications.base.project=${env.JOB_BASE_NAME}" \
+                         -jar "$JAR"
+                '''
+            }
         }
     }
 }
