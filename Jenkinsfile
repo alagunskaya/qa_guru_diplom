@@ -72,7 +72,6 @@ pipeline {
 
             // Отправка уведомления в Telegram
             script {
-                // ВАЖНО: используем ТРОЙНЫЕ ДВОЙНЫЕ кавычки ("""...""")
                 sh """
                     if [ ! -f "allure-report/widgets/summary.json" ]; then
                         echo "No Allure report found. Skipping Telegram notification."
@@ -80,21 +79,22 @@ pipeline {
                     fi
 
                     JAR_VERSION=5.1.2
-                    JAR="allure-notifications-${JAR_VERSION}.jar"
+                    JAR="allure-notifications-\${JAR_VERSION}.jar"
 
                     if [ ! -f "\$JAR" ]; then
-                        curl -fsSL -o "\$JAR" "https://github.com/qa-guru/allure-notifications/releases/download/v${JAR_VERSION}/\$JAR" || \
-                        curl -fsSL -o "\$JAR" "https://github.com/qa-guru/allure-notifications/releases/download/${JAR_VERSION}/\$JAR"
+                        curl -fsSL -o "\$JAR" "https://github.com/qa-guru/allure-notifications/releases/download/v\${JAR_VERSION}/\$JAR" || \\
+                        curl -fsSL -o "\$JAR" "https://github.com/qa-guru/allure-notifications/releases/download/\${JAR_VERSION}/\$JAR"
                     fi
 
                     # Передаем токен и чат через -D (системные свойства)
-                    java -DconfigFile=notifications/telegram.json \
-                         "-Dnotifications.telegram.token=${params.TELEGRAM_TOKEN}" \
-                         "-Dnotifications.telegram.chat=${params.TELEGRAM_CHAT_ID}" \
-                         "-Dnotifications.base.reportLink=${env.BUILD_URL}allure/index.html" \
-                         "-Dnotifications.base.project=${env.JOB_BASE_NAME}" \
+                    java -DconfigFile=notifications/telegram.json \\
+                         "-Dnotifications.telegram.token=${params.TELEGRAM_TOKEN}" \\
+                         "-Dnotifications.telegram.chat=${params.TELEGRAM_CHAT_ID}" \\
+                         "-Dnotifications.base.reportLink=${env.BUILD_URL}allure/index.html" \\
+                         "-Dnotifications.base.project=${env.JOB_BASE_NAME}" \\
                          -jar "\$JAR"
                 """
             }
         }
     }
+}
