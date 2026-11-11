@@ -72,7 +72,27 @@ pipeline {
 
             // Отправка уведомления в Telegram
             script {
-                // Передаем токен и чат как переменные окружения
+                // 1. Создаем файл конфигурации
+                writeFile file: 'notifications/telegram.json', text: '''\
+                    {
+                      "base": {
+                        "project": "FakeStoreAPI & Demoblaze",
+                        "environment": "qa.guru",
+                        "comment": "SUCCESS",
+                        "reportLink": "",
+                        "language": "en",
+                        "allureFolder": "allure-report",
+                        "enableChart": true
+                      },
+                      "proxy": {
+                        "type": "socks5",
+                        "host": "proxy.qaguru.school",
+                        "port": 7777
+                      }
+                    }
+                '''.stripIndent()
+
+                // 2. Передаем токен и чат через переменные окружения
                 withEnv([
                     "TG_TOKEN=${params.TELEGRAM_TOKEN}",
                     "TG_CHAT=${params.TELEGRAM_CHAT_ID}"
@@ -91,7 +111,6 @@ pipeline {
                             curl -fsSL -o "$JAR" "https://github.com/qa-guru/allure-notifications/releases/download/${JAR_VERSION}/$JAR"
                         fi
 
-                        # Токен и чат берутся из переменных окружения TG_TOKEN и TG_CHAT
                         java -DconfigFile=notifications/telegram.json \
                              "-Dnotifications.telegram.token=$TG_TOKEN" \
                              "-Dnotifications.telegram.chat=$TG_CHAT" \
