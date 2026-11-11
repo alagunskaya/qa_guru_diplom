@@ -102,7 +102,7 @@ UI: https://selenoid.qa.guru/ui/
 ![Allure Report](media/Allure4.png)
 
 ### Результат сборки Jenkins и оповещение в Telegram
-<img src="/media/Allure5.png" alt="Сборка Jenkins" height ="250"><img src="/media/Results.png" alt="Оповещение" height="250">
+<img src="/media/Allure5.png" alt="Сборка Jenkins" height ="230"><img src="/media/Results.png" alt="Оповещение" height="230">
 
 ### Пример видеозаписи прохождения теста
 ![Video](media/Add_to_cart.gif)
