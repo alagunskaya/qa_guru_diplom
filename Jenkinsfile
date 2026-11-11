@@ -120,6 +120,8 @@ pipeline {
                              "-Dnotifications.base.allureFolder=${WORKSPACE}/allure-report" \
                              "-Dnotifications.base.language=en" \
                              "-Dnotifications.base.enableChart=true" \
+                             "-Dnotifications.base.environment=qa.guru" \
+                             "-Dnotifications.base.comment=SUCCESS" \
                              -jar "$JAR"
                     '''
                 }
